@@ -1,0 +1,28 @@
+#
+#   ansible/Kubernetes-JoinCommand.yaml
+#
+#   David Janes
+#   Consensas
+#   2018-12-23
+#
+
+- name: Kubernetes Create Join Master
+  hosts: "{{ in_hosts }}"
+  become_user: root
+
+  tasks:
+  - name: Create Join Command
+    become: yes
+    command: "kubeadm token create --print-join-command"
+    register: join
+
+  - name: "Save Join Command"
+    copy:
+      content: "{{ join.stdout }}"
+      dest: "{{ ansible_env.HOME }}/join.sh"
+
+  - name: Fetch Join Command
+    fetch:
+      src: "{{ ansible_env.HOME }}/join.sh"
+      dest: ./.join.sh
+      flat: yes

@@ -1,0 +1,114 @@
+#
+#   ansible/Kubernetes-Master.yaml
+#
+#   David Janes
+#   Consensas
+#   2018-12-23
+#
+
+- name: Kubernetes Master Setup
+  hosts: "{{ in_hosts }}"
+  become_user: root
+
+  tasks:
+  - name: Ping
+    ping:
+
+  - name: Make /etc/consensas.ansible
+    become: yes
+    file:
+      path: /etc/consensas.ansible
+      state: directory
+
+#
+#   Kubeadm config
+#
+  - name: Test /etc/consensas.ansible/kubeadmin_config_images
+    become: yes
+    register: kubeadmin_config_images
+    stat:
+      path: /etc/consensas.ansible/kubeadmin_config_images
+
+  - name: K8S Pull Images
+    become: true
+    run_once: true
+    when: kubeadmin_config_images.stat.exists == false
+    command: kubeadm config images pull
+
+  - name: Make /etc/consensas.ansible/kubeadmin_config_images
+    become: yes
+    when: kubeadmin_config_images.stat.exists == false
+    file:
+      path: /etc/consensas.ansible/kubeadmin_config_images
+      state: touch
+
+
+#
+#   Kubeadm init
+#
+  - name: Test /etc/consensas.ansible/kubeadm_init
+    become: yes
+    register: kubeadm_init
+    stat:
+      path: /etc/consensas.ansible/kubeadm_init
+
+  - name: K8S Initialize
+    become: true
+    when: kubeadm_init.stat.exists == false
+    command: "kubeadm init --apiserver-advertise-address={{ ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0]) }} --apiserver-cert-extra-sans={{ ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0]) }},{{ in_hosts }} --pod-network-cidr=10.244.0.0/16"
+
+  - name: Make /etc/consensas.ansible/kubeadm_init
+    become: yes
+    when: kubeadm_init.stat.exists == false
+    file:
+      path: /etc/consensas.ansible/kubeadm_init
+      state: touch
+
+#
+#   User setup
+#
+  - name: Copy admin.conf
+    become: true
+    copy:
+      src: /etc/kubernetes/admin.conf
+      remote_src: yes
+      dest: "{{ ansible_env.HOME }}/admin.conf"
+      owner: "{{ ansible_env.USER }}"
+      group: "{{ ansible_env.USER }}"
+
+  - name: Make $HOME/.kube
+    become: no
+    file:
+      path: "{{ ansible_env.HOME }}/.kube"
+      state: directory
+
+  - name: Copy kube/config
+    become: true
+    copy:
+      src: /etc/kubernetes/admin.conf 
+      remote_src: yes
+      dest: "{{ ansible_env.HOME }}/.kube/config"
+      owner: "{{ ansible_env.USER }}"
+      group: "{{ ansible_env.USER }}"
+
+#
+#   Calico Networking
+#
+  - name: Test /etc/consensas.ansible/calico
+    become: yes
+    register: calico
+    stat:
+      path: /etc/consensas.ansible/calico
+
+  - name: Calico Initialize
+    become: no
+    when: calico.stat.exists == false
+    command: "kubectl apply -f https://docs.projectcalico.org/v3.11/manifests/calico.yaml"
+
+  - name: Make /etc/consensas.ansible/calico
+    become: yes
+    when: calico.stat.exists == false
+    file:
+      path: /etc/consensas.ansible/calico
+      state: touch
+

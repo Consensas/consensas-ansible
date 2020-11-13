@@ -1,0 +1,29 @@
+#
+#   ansible/Kubernetes-JoinWorker.yaml
+#
+#   David Janes
+#   Consensas
+#   2018-12-23
+#
+
+- name: Kubernetes Join Worker
+  hosts: "{{ in_hosts }}"
+  become_user: root
+
+  tasks:
+  - name: Upload Join Command
+    become: yes
+    copy:
+      src: ./.join.sh
+      dest: "{{ ansible_env.HOME }}/join.sh"
+
+  - name: Test /etc/kubernetes/kubelet.conf
+    become: yes
+    register: kubelet
+    stat:
+      path: /etc/kubernetes/kubelet.conf
+
+  - name: "Run Join Command"
+    become: yes
+    when: kubelet.stat.exists == false
+    shell: "sh {{ ansible_env.HOME }}/join.sh"
