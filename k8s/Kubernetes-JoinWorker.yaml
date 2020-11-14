@@ -14,7 +14,7 @@
   - name: Upload Join Command
     become: yes
     copy:
-      src: ./.join.sh
+      src: "{{ in_join }}"
       dest: "{{ ansible_env.HOME }}/join.sh"
 
   - name: Test /etc/kubernetes/kubelet.conf

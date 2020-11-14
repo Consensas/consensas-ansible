@@ -7,7 +7,8 @@
 #
 
 FOLDER=$(dirname $0)
-ANSIBLE_HOSTS=master,worker
+ANSIBLE_HOSTS=$1
+ANSIBLE_HOSTS=${ANSIBLE_HOSTS:=master,worker}
 ANSIBLE_INVENTORY=$FOLDER/../inventory.yaml
 
 export ANSIBLE_HOST_KEY_CHECKING=False

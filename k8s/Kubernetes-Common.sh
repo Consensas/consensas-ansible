@@ -1,5 +1,5 @@
 #
-#   ansible/Kubernetes-Common.sh
+#   k8s/Kubernetes-Common.sh
 #
 #   David Janes
 #   Consensas
@@ -7,11 +7,16 @@
 #
 
 FOLDER=$(dirname $0)
+ANSIBLE_HOSTS=$1
+ANSIBLE_HOSTS=${ANSIBLE_HOSTS:=master,worker}
+ANSIBLE_INVENTORY=$FOLDER/../inventory.yaml
+
+export ANSIBLE_HOST_KEY_CHECKING=False
 
 set -x
 
 ansible-playbook \
-    --inventory $FOLDER/inventory.yaml \
+    --inventory "${ANSIBLE_INVENTORY}" \
     --verbose \
-    --extra-vars "in_hosts=master,worker" \
+    --extra-vars "in_hosts=${ANSIBLE_HOSTS}" \
     /dev/stdin < $FOLDER/Kubernetes-Common.yaml

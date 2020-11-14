@@ -12,6 +12,11 @@ you might find useful.
 You'll need to have Ansible installed on your computer and
 root access to edit [/etc/hosts](https://www.thegeekdiary.com/understanding-etc-hosts-file-in-linux/).
 
+One word of advice: make these your own - copy and
+modify as you see fit for your system. Don't expect
+super parameterized general scripts here. It's a 
+jumping off point.
+
 ## Inventory 
 
 Ansible uses an "inventory" file to describe all the hosts upon
@@ -73,11 +78,16 @@ I originally wrote this when we were having difficulty getting
 networking working: this let me try out a whole bunch of different
 options in a matter of minutes.
 
+#### Create AWS Instances
+
+If you already have some computers available, or some Raspberry Pis or whatever,
+you can more or less ignore this step. 
+
 * Log in to your AWS Account and go to [EC2](https://console.aws.amazon.com/ec2/v2/home?region=us-east-1#Home:)
 * Go to the [Launch Wizard](https://console.aws.amazon.com/ec2/v2/home?region=us-east-1#LaunchInstanceWizard:)
 * Look for the AMI called **Ubuntu Server 20.04 LTS (HVM), SSD Volume Type** and go through the
   setup step by step
-  * **Instance Type** to taste. `t2.micro` is fine for playing around
+  * **Instance Type** to taste. `t2.medium` is the minimum - it will require at least 2 cores
   * **Configure Instance Details**: select the number of instances to create - you need at least 2 for K8S,
     Everything else should be fine
   * **Add Storage**: should be fine
@@ -88,9 +98,24 @@ options in a matter of minutes.
     sure that folder is `chmod 700`. The keypair is stored
     in a `PEM` file which is needed for accessing AWS.
 * Go back to the EC2 home page and name the servers `aws-0001` and so on
-* Copy the names and **Public IPv4** addresses and add to `/etc/hosts` on your computer
+
+#### Note on networking
+
+If you're just playing around and plan to be starting and stopping the instances
+frequently (so you don't get charged), consider assigning ElasticIP addresses 
+to your instances, otherwise the IP will change every time you start and stop.
+Another option is to use IPv6, though I have not played with this. 
+
+If the IP addresses change, you will have to edit `$HOME/.ssh/known_hosts` and
+delete the old IP addresses first.
+
+#### Set up local inventory
+
+* Copy the names and **Public IPv4** (or **ElasticIP**) addresses and add to `/etc/hosts` on your computer
 * Make sure `inventory.yaml` also reflects the hosts you created **AND** your PEM file.
   It should look something like this (assuming you created 3 hosts). 
+
+`inventory.yaml`:
 
     all:
       hosts:
@@ -106,18 +131,28 @@ options in a matter of minutes.
             aws-0002:
             aws-0003:
 
-* Know 
+#### Base Ubuntu setup
 
-  If you're 
-  having problems it's likely that this isn't correct. Another possible issue (if you've
-  done this mulkt
+Run this script, which will install Python, Node.JS, curl and vim.
+
+    sh ubuntu/Ubuntu-Initialize.sh
+
+It can be parameterized with a single argument, the name of a host
+or a collection of hosts, e.g, `master,workers`, in case you add
+something later.
+
+Note that this script, like all others here are basically *idempotent*:
+you can safely run it multiple times.
+
+#### Setup Kubernetes 
+
+First, run this script. This will install Kubernetes, Container.io,
+system level configuration (e.g. turning off swap) needed to 
+run K8S on all the hosts.  For reference, though we used very little of this 
+[read more](https://kubernetes.io/blog/2019/03/15/kubernetes-setup-using-ansible-and-vagrant/).
 
 
-    sudo bash
-    apt-get update && apt-get upgrade -y && apt-get install -y python
+    sh k8s/Kubernetes-Common.sh
 
-For reference, though we used very little of this:
-
-* https://kubernetes.io/blog/2019/03/15/kubernetes-setup-using-ansible-and-vagrant/
-
+Next - and order is very important here - run this script:
 

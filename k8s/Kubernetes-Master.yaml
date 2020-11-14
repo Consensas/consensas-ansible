@@ -55,7 +55,7 @@
   - name: K8S Initialize
     become: true
     when: kubeadm_init.stat.exists == false
-    command: "kubeadm init --apiserver-advertise-address={{ ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0]) }} --apiserver-cert-extra-sans={{ ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0]) }},{{ in_hosts }} --pod-network-cidr=10.244.0.0/16"
+    command: "kubeadm init --apiserver-advertise-address={{ ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0]) }} --apiserver-cert-extra-sans={{ ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0]) }},{{ in_master }} --pod-network-cidr=10.244.0.0/16"
 
   - name: Make /etc/consensas.ansible/kubeadm_init
     become: yes

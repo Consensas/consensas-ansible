@@ -24,5 +24,10 @@
   - name: Fetch Join Command
     fetch:
       src: "{{ ansible_env.HOME }}/join.sh"
-      dest: ./.join.sh
+      dest: "{{ in_join }}"
       flat: yes
+
+  - name: Delete Join Command File
+    file:
+      path: "{{ ansible_env.HOME }}/join.sh"
+      state: absent
