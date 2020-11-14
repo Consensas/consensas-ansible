@@ -21,5 +21,9 @@ ansible-playbook \
     --extra-vars "in_hosts=${ANSIBLE_HOSTS}" \
     $FOLDER/Kubernetes-KubeConfig.yaml
 
+## admin.conf wants to give you an internal AWS IP
+sed -e '1,$ s|server:.*6443|server: https://aws-0001:6443|' < $FOLDER/admin.conf > $FOLDER/admin.conf.tmp &&
+mv $FOLDER/admin.conf.tmp $FOLDER/admin.conf
+
 echo "---"
 kubectl --kubeconfig $FOLDER/admin.conf get nodes
