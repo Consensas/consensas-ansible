@@ -1,0 +1,39 @@
+#
+#   k8s/Kubernetes-Reset.sh
+#
+#   David Janes
+#   Consensas
+#   2020-11-14
+#
+
+- name: Kubernetes Teardown
+  hosts: "{{ in_hosts }}"
+  become_user: root
+  become: true
+
+  tasks:
+  - name: Ping
+    ping:
+
+  - name: Kube Reset
+    command: kubeadm reset -f
+    ignore_errors: yes
+
+  - name: Remove /etc/consensas.ansible
+    register: consensas
+    become: yes
+    file:
+      path: /etc/consensas.ansible
+      state: absent
+
+  - name: Remove /etc/cni
+    register: cni
+    become: yes
+    file:
+      path: /etc/cni
+      state: absent
+
+  - name: reboot if files changed
+    become: yes
+    when: consensas.changed or consensas.changed
+    reboot:

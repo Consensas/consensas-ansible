@@ -3,10 +3,13 @@
 ## Introduction
 
 A couple of [Ansible](https://www.ansible.com/) scripts that 
-you might find useful.
+you might find useful, especially for creating and working
+with Kubernetes.
 
-* K8S Quickstart - quickly set up a Kubernetes installation
-* Ubuntu Install - set up Ubuntu on a base installation
+* AWS Quickstart - how to set up your Ansible inventory with AWS
+* Kubernetes Quickstart - quickly set up a Kubernetes installation
+* Ubuntu Initialize - set up Ubuntu on a base installation
+* Ubuntu Full - add more packages to your Ubuntu installation
 * Node Install - install the latest Node.JS
 
 You'll need to have Ansible installed on your computer and
@@ -14,7 +17,7 @@ root access to edit [/etc/hosts](https://www.thegeekdiary.com/understanding-etc-
 It's nice to have Kubernetes on your computer, so you
 can communicate with the K8S cluster.
 
-One word of advice: make these your own - copy and
+One word of advice: **make these your own** - copy and
 modify as you see fit for your system. Don't expect
 super parameterized general scripts here. It's a 
 jumping off point.
@@ -72,23 +75,11 @@ scheme, you'll have to modify `k8s/Kubernetes-Master.sh`,
 is Kubernetes **requires** that you tell it the DNS name
 you'll using to talk to it.
 
-## Tools
+## AWS Quickstart
 
-### K8S Quickstart
-
-This repository very quickly will set up a [Kubernetes](https://kubernetes.io/)
-system on AWS (trivially adapted to other clouds or machines on the LAN).
-
-K8S is (to me) a very very complicated system, but one nice thing about it
-is if you run into trouble, you can usually just tear it down and rebuild. 
-I originally wrote this when we were having difficulty getting
-networking working: this let me try out a whole bunch of different
-options in a matter of minutes.
-
-#### Create AWS Instances
-
-If you already have some computers available, or some Raspberry Pis or whatever,
-you can more or less ignore this step. 
+If you already have some computers available, skip ahead to the inventory 
+sections. Note that these scripts are designed around the x86 architecure,
+so you might have to make some tweaks e.g. for Raspberry Pi.
 
 * Log in to your AWS Account and go to [EC2](https://console.aws.amazon.com/ec2/v2/home?region=us-east-1#Home:)
 * Go to the [Launch Wizard](https://console.aws.amazon.com/ec2/v2/home?region=us-east-1#LaunchInstanceWizard:)
@@ -110,7 +101,7 @@ you can more or less ignore this step.
     in a `PEM` file which is needed for accessing AWS.
 * Go back to the EC2 home page and name the servers `aws-0001` and so on
 
-#### Notes on networking
+### Notes on AWS networking
 
 If you're just playing around and plan to be starting and stopping the instances
 frequently (so you don't get charged), consider assigning ElasticIP addresses 
@@ -127,7 +118,7 @@ for the world to see.
 If you get long hangs and then failures, likely the issue is something is 
 being blocked because of your security rules.
 
-#### Set up local inventory
+### AWS Inventory
 
 * Copy the names and **Public IPv4** (or **ElasticIP**) addresses and add to `/etc/hosts` on your computer
 * Make sure `inventory.yaml` also reflects the hosts you created **AND** your PEM file.
@@ -149,9 +140,36 @@ being blocked because of your security rules.
             aws-0002:
             aws-0003:
 
-#### Base Ubuntu setup
+## Kuberenetes Quickstart
 
-Run this script, which will install Python, Node.JS, curl and vim.
+This repository very quickly will set up a [Kubernetes](https://kubernetes.io/)
+system on AWS (trivially adapted to other clouds or machines on the LAN).
+
+K8S is (to me) a very very complicated system, but one nice thing about it
+is if you run into trouble, you can usually just tear it down and rebuild. 
+I originally wrote this when we were having difficulty getting
+networking working: this let me try out a whole bunch of different
+options in a matter of minutes.
+
+### Setup Ubuntu
+
+Follow the instructions in the **Ubuntu Initialize** section below.
+
+### Setup Kubernetes 
+
+First, run this script. This will install Kubernetes, Container.io,
+system level configuration (e.g. turning off swap) needed to 
+run K8S on all the hosts.  For reference, though we used very little of this 
+[read more](https://kubernetes.io/blog/2019/03/15/kubernetes-setup-using-ansible-and-vagrant/).
+
+    sh k8s/Kubernetes-Common.sh
+
+Next - and order is very important here - run this script:
+
+## Ubuntu Initialize
+
+Run this script, which will install Python (needed for ansible) and
+make sure the software is up to date.
 
     sh ubuntu/Ubuntu-Initialize.sh
 
@@ -162,14 +180,20 @@ something later.
 Note that this script, like all others here are basically *idempotent*:
 you can safely run it multiple times.
 
-#### Setup Kubernetes 
+## Ubuntu Full
 
-First, run this script. This will install Kubernetes, Container.io,
-system level configuration (e.g. turning off swap) needed to 
-run K8S on all the hosts.  For reference, though we used very little of this 
-[read more](https://kubernetes.io/blog/2019/03/15/kubernetes-setup-using-ansible-and-vagrant/).
+Run this script, which will install vim and net-tools. 
+A number of other packages you might find useful are commented out.
 
-    sh k8s/Kubernetes-Common.sh
+Normally you will run this parameterized, as usually on Kubernetes
+Workers there's no need to install everything.
+Even better is to modify your inventory and add new groups
+like `mail` or `wordpress`, and use that so package installation is
+more logical.
 
-Next - and order is very important here - run this script:
+    sh ubuntu/Ubuntu-Full.sh aws-0001
+    
+
+Note that this script, like all others here are basically *idempotent*:
+you can safely run it multiple times.
 
