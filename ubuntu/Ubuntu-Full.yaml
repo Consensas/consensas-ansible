@@ -1,0 +1,49 @@
+#
+#   ubuntu/Ubutu-Full.yaml
+#
+#   David Janes
+#   Consensas
+#   2020-11-14
+#
+
+- name: Ubuntu Full
+  hosts: "{{ in_hosts }}"
+  become: true
+  become_user: root
+
+  tasks:
+  - name: Ping
+    ping:
+
+  - name: Install Packages
+    become: yes
+    apt:
+      pkg:
+      - curl
+      - vim
+      # - default-jdk ## Java
+      # - mailutils ## mail from commandline
+      # - mariadb-server ## database
+      # - poppler-utils ## PDF tools
+      # - python3 ## Python3
+      # - sendmail ## serve mail
+    
+  - name: Install the gpg key for nodejs LTS
+    become: yes
+    apt_key:
+      url: "https://deb.nodesource.com/gpgkey/nodesource.gpg.key"
+      state: present
+
+  - name: Install the nodejs LTS repos
+    become: yes
+    apt_repository:
+      repo: "deb https://deb.nodesource.com/node_14.x {{ ansible_distribution_release }} main"
+      state: present
+      update_cache: yes
+
+  - name: Install the nodejs
+    become: yes
+    apt:
+      name: nodejs
+      state: latest
+

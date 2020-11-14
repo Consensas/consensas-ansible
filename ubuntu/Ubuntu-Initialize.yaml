@@ -1,5 +1,5 @@
 #
-#   ansible/Ubutu-Initialize.yaml
+#   ubuntu/Ubuntu-Initialize.yaml
 #
 #   David Janes
 #   Consensas
@@ -20,23 +20,4 @@
     apt:
       pkg:
       - curl
-      - vim
-    
-  - name: Install the gpg key for nodejs LTS
-    become: yes
-    apt_key:
-      url: "https://deb.nodesource.com/gpgkey/nodesource.gpg.key"
-      state: present
-
-  - name: Install the nodejs LTS repos
-    become: yes
-    apt_repository:
-      repo: "deb https://deb.nodesource.com/node_14.x {{ ansible_distribution_release }} main"
-      state: present
-      update_cache: yes
-
-  - name: Install the nodejs
-    become: yes
-    apt:
-      name: nodejs
-      state: latest
+      - net-tools
