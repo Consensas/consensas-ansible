@@ -7,8 +7,8 @@ you might find useful, especially for creating and working
 with Kubernetes.
 
 * AWS Quickstart - how to set up your Ansible inventory with AWS
-* Kubernetes Quickstart - quickly set up a Kubernetes installation
-* Ubuntu Initialize - set up Ubuntu on a base installation
+* Kubernetes Quickstart - quickly set up a Kubernetes installation with Flannel
+* Ubuntu Initialize - Ubuntu 20.04 basic setup
 * Ubuntu Full - add more packages to your Ubuntu installation
 * Node Install - install the latest Node.JS
 
@@ -143,7 +143,8 @@ being blocked because of your security rules.
 ## Kuberenetes Quickstart
 
 This repository very quickly will set up a [Kubernetes](https://kubernetes.io/)
-system on AWS (trivially adapted to other clouds or machines on the LAN).
+system on AWS (trivially adapted to other clouds or machines on the LAN), 
+with [Flannel](https://github.com/coreos/flannel) networking.
 
 K8S is (to me) a very very complicated system, but one nice thing about it
 is if you run into trouble, you can usually just tear it down and rebuild. 
