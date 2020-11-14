@@ -1,4 +1,4 @@
-q# consensas-ansible
+# consensas-ansible
 
 ## Introduction
 
@@ -11,6 +11,8 @@ you might find useful.
 
 You'll need to have Ansible installed on your computer and
 root access to edit [/etc/hosts](https://www.thegeekdiary.com/understanding-etc-hosts-file-in-linux/).
+It's nice to have Kubernetes on your computer, so you
+can communicate with the K8S cluster.
 
 One word of advice: make these your own - copy and
 modify as you see fit for your system. Don't expect
@@ -65,6 +67,11 @@ user `david` can sudo root commands.
             aws-0003:
               
 
+**Important** - if you customize and use your own naming
+scheme, you'll have to modify `k8s/Kubernetes-Master.sh`,
+is Kubernetes **requires** that you tell it the DNS name
+you'll using to talk to it.
+
 ## Tools
 
 ### K8S Quickstart
@@ -92,14 +99,18 @@ you can more or less ignore this step.
     Everything else should be fine
   * **Add Storage**: should be fine
   * **Add Tags**: to taste
-  * **Configure Security Group**: make sure there is SSH access
+  * **Configure Security Group**: make sure there is open (0.0.0.0/32) SSH (port 22) 
+    and Kubernetes (port 6443) access. 
+    *Not sure if VPC open is the default but this is required too*.
+    From a security point of view, this isn't ideal
+    and you'll want to narrow it down, but explaining AWS Security Groups is out of scope.
   * **Review Instance Launch**: review and press **Launch**. 
     Create a keypair if you haven't already and store in `~/.aws`. Make
     sure that folder is `chmod 700`. The keypair is stored
     in a `PEM` file which is needed for accessing AWS.
 * Go back to the EC2 home page and name the servers `aws-0001` and so on
 
-#### Note on networking
+#### Notes on networking
 
 If you're just playing around and plan to be starting and stopping the instances
 frequently (so you don't get charged), consider assigning ElasticIP addresses 
@@ -108,6 +119,13 @@ Another option is to use IPv6, though I have not played with this.
 
 If the IP addresses change, you will have to edit `$HOME/.ssh/known_hosts` and
 delete the old IP addresses first.
+
+If you're not familiar with AWS, just be aware every host has two IP address:
+one for its Virtual Private Cloud (VPC) inside AWS, and the other is public 
+for the world to see.
+
+If you get long hangs and then failures, likely the issue is something is 
+being blocked because of your security rules.
 
 #### Set up local inventory
 
@@ -150,7 +168,6 @@ First, run this script. This will install Kubernetes, Container.io,
 system level configuration (e.g. turning off swap) needed to 
 run K8S on all the hosts.  For reference, though we used very little of this 
 [read more](https://kubernetes.io/blog/2019/03/15/kubernetes-setup-using-ansible-and-vagrant/).
-
 
     sh k8s/Kubernetes-Common.sh
 
