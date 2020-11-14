@@ -92,23 +92,44 @@
       group: "{{ ansible_env.USER }}"
 
 #
-#   Calico Networking
+#   Flannel Networking
 #
-  - name: Test /etc/consensas.ansible/calico
+  - name: Test /etc/consensas.ansible/flannel
     become: yes
-    register: calico
+    register: flannel
     stat:
-      path: /etc/consensas.ansible/calico
+      path: /etc/consensas.ansible/flannel
 
-  - name: Calico Initialize
+  - name: Flannel Initialize
     become: no
-    when: calico.stat.exists == false
-    command: "kubectl apply -f https://docs.projectcalico.org/v3.11/manifests/calico.yaml"
+    when: flannel.stat.exists == false
+    command: "kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml"
 
-  - name: Make /etc/consensas.ansible/calico
+  - name: Make /etc/consensas.ansible/flannel
     become: yes
-    when: calico.stat.exists == false
+    when: flannel.stat.exists == false
     file:
-      path: /etc/consensas.ansible/calico
+      path: /etc/consensas.ansible/flannel
       state: touch
-
+ 
+## #
+## #   Calico Networking
+## #
+##   - name: Test /etc/consensas.ansible/calico
+##     become: yes
+##     register: calico
+##     stat:
+##       path: /etc/consensas.ansible/calico
+## 
+##   - name: Calico Initialize
+##     become: no
+##     when: calico.stat.exists == false
+##     command: "kubectl apply -f https://docs.projectcalico.org/v3.11/manifests/calico.yaml"
+## 
+##   - name: Make /etc/consensas.ansible/calico
+##     become: yes
+##     when: calico.stat.exists == false
+##     file:
+##       path: /etc/consensas.ansible/calico
+##       state: touch
+## 

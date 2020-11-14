@@ -21,3 +21,7 @@
       pkg:
       - curl
       - net-tools
+
+  - name: "change hostname to '{{ inventory_hostname }}'"
+    hostname:
+      name: "{{ inventory_hostname }}"

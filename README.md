@@ -164,7 +164,25 @@ run K8S on all the hosts.  For reference, though we used very little of this
 
     sh k8s/Kubernetes-Common.sh
 
-Next - and order is very important here - run this script:
+Next - and order is very important here - run this script to set up the
+K8S master:
+
+    sh k8s/Kubernetes-Master.sh
+
+Then to configure all the workers
+
+    sh k8s/Kubernetes-Worker.sh
+
+At this point you cluster should be up and running. To confim
+
+    sh k8s/Kubernetes-KubeConfig.sh
+
+And you should see
+
+    + kubectl --kubeconfig ./admin.conf get nodes
+    NAME       STATUS   ROLES    AGE     VERSION
+    aws-0001   Ready    master   2m10s   v1.19.4
+    aws-0002   Ready    <none>   23s     v1.19.4
 
 ## Ubuntu Initialize
 
